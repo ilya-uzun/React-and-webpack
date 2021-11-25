@@ -1,0 +1,15 @@
+{
+  "name": "Reack_and_webpack",
+  "version": "1.0-SNAPSHOT",
+  "private": true,
+  "workspaces": [
+    "packages/Reack_and_webpack",
+    "packages/Reack_and_webpack-test"
+  ],
+  "resolutions": {},
+  "devDependencies": {},
+  "dependencies": {},
+  "peerDependencies": {},
+  "optionalDependencies": {},
+  "bundledDependencies": []
+}
