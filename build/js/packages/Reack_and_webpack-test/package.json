@@ -17,6 +17,8 @@
     "style-loader": "2.0.0"
   },
   "dependencies": {
+    "react": "17.0.1",
+    "react-dom": "17.0.1",
     "Reack_and_webpack": "1.0.0-SNAPSHOT",
     "kotlin": "file:/home/ilya/Desktop/pgit/React-and-webpack/build/js/packages_imported/kotlin/1.5.10",
     "kotlin-wrappers-kotlin-react-js-legacy": "file:/home/ilya/Desktop/pgit/React-and-webpack/build/js/packages_imported/kotlin-wrappers-kotlin-react-js-legacy/1.0.0-SNAPSHOT",

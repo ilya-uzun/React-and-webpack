@@ -3,15 +3,18 @@
   "version": "1.0.0-SNAPSHOT",
   "main": "kotlin/Reack_and_webpack.js",
   "devDependencies": {
+    "dukat": "0.5.8-rc.4",
     "webpack": "5.35.0",
     "webpack-cli": "4.6.0",
     "format-util": "1.0.5",
     "source-map-loader": "2.0.1",
+    "webpack-dev-server": "4.0.0-beta.2",
     "css-loader": "5.2.4",
-    "style-loader": "2.0.0",
-    "dukat": "0.5.8-rc.4"
+    "style-loader": "2.0.0"
   },
   "dependencies": {
+    "react": "17.0.1",
+    "react-dom": "17.0.1",
     "kotlin": "file:/home/ilya/Desktop/pgit/React-and-webpack/build/js/packages_imported/kotlin/1.5.10",
     "kotlin-wrappers-kotlin-react-js-legacy": "file:/home/ilya/Desktop/pgit/React-and-webpack/build/js/packages_imported/kotlin-wrappers-kotlin-react-js-legacy/1.0.0-SNAPSHOT",
     "kotlin-wrappers-kotlin-extensions-js-legacy": "file:/home/ilya/Desktop/pgit/React-and-webpack/build/js/packages_imported/kotlin-wrappers-kotlin-extensions-js-legacy/1.0.1-pre.206-kotlin-1.5.10",
