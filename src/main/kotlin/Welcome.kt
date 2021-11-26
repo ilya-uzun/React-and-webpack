@@ -8,7 +8,7 @@ import react.RState
 import react.dom.attrs
 import react.dom.div
 import react.dom.input
-import kotlinx.browser.document
+
 
 external interface WelcomeProps : RProps {
     var name: String

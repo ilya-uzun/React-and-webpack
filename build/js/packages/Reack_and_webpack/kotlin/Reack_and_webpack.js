@@ -1,39 +1,86 @@
 (function (root, factory) {
   if (typeof define === 'function' && define.amd)
-    define(['exports', 'kotlin', 'kotlin-wrappers-kotlin-react-dom-js-legacy', 'kotlinx-html-js', 'kotlin-wrappers-kotlin-react-js-legacy'], factory);
+    define(['exports', 'kotlin', 'kotlinx-coroutines-core', 'kotlin-wrappers-kotlin-react-dom-js-legacy', 'kotlin-wrappers-kotlin-react-js-legacy', 'kotlinx-html-js'], factory);
   else if (typeof exports === 'object')
-    factory(module.exports, require('kotlin'), require('kotlin-wrappers-kotlin-react-dom-js-legacy'), require('kotlinx-html-js'), require('kotlin-wrappers-kotlin-react-js-legacy'));
+    factory(module.exports, require('kotlin'), require('kotlinx-coroutines-core'), require('kotlin-wrappers-kotlin-react-dom-js-legacy'), require('kotlin-wrappers-kotlin-react-js-legacy'), require('kotlinx-html-js'));
   else {
     if (typeof kotlin === 'undefined') {
       throw new Error("Error loading module 'Reack_and_webpack'. Its dependency 'kotlin' was not found. Please, check whether 'kotlin' is loaded prior to 'Reack_and_webpack'.");
+    }if (typeof this['kotlinx-coroutines-core'] === 'undefined') {
+      throw new Error("Error loading module 'Reack_and_webpack'. Its dependency 'kotlinx-coroutines-core' was not found. Please, check whether 'kotlinx-coroutines-core' is loaded prior to 'Reack_and_webpack'.");
     }if (typeof this['kotlin-wrappers-kotlin-react-dom-js-legacy'] === 'undefined') {
       throw new Error("Error loading module 'Reack_and_webpack'. Its dependency 'kotlin-wrappers-kotlin-react-dom-js-legacy' was not found. Please, check whether 'kotlin-wrappers-kotlin-react-dom-js-legacy' is loaded prior to 'Reack_and_webpack'.");
-    }if (typeof this['kotlinx-html-js'] === 'undefined') {
-      throw new Error("Error loading module 'Reack_and_webpack'. Its dependency 'kotlinx-html-js' was not found. Please, check whether 'kotlinx-html-js' is loaded prior to 'Reack_and_webpack'.");
     }if (typeof this['kotlin-wrappers-kotlin-react-js-legacy'] === 'undefined') {
       throw new Error("Error loading module 'Reack_and_webpack'. Its dependency 'kotlin-wrappers-kotlin-react-js-legacy' was not found. Please, check whether 'kotlin-wrappers-kotlin-react-js-legacy' is loaded prior to 'Reack_and_webpack'.");
-    }root.Reack_and_webpack = factory(typeof Reack_and_webpack === 'undefined' ? {} : Reack_and_webpack, kotlin, this['kotlin-wrappers-kotlin-react-dom-js-legacy'], this['kotlinx-html-js'], this['kotlin-wrappers-kotlin-react-js-legacy']);
+    }if (typeof this['kotlinx-html-js'] === 'undefined') {
+      throw new Error("Error loading module 'Reack_and_webpack'. Its dependency 'kotlinx-html-js' was not found. Please, check whether 'kotlinx-html-js' is loaded prior to 'Reack_and_webpack'.");
+    }root.Reack_and_webpack = factory(typeof Reack_and_webpack === 'undefined' ? {} : Reack_and_webpack, kotlin, this['kotlinx-coroutines-core'], this['kotlin-wrappers-kotlin-react-dom-js-legacy'], this['kotlin-wrappers-kotlin-react-js-legacy'], this['kotlinx-html-js']);
   }
-}(this, function (_, Kotlin, $module$kotlin_wrappers_kotlin_react_dom_js_legacy, $module$kotlinx_html_js, $module$kotlin_wrappers_kotlin_react_js_legacy) {
+}(this, function (_, Kotlin, $module$kotlinx_coroutines_core, $module$kotlin_wrappers_kotlin_react_dom_js_legacy, $module$kotlin_wrappers_kotlin_react_js_legacy, $module$kotlinx_html_js) {
   'use strict';
   var $$importsForInline$$ = _.$$importsForInline$$ || (_.$$importsForInline$$ = {});
+  var MainScope = $module$kotlinx_coroutines_core.kotlinx.coroutines.MainScope;
+  var RComponent_init = $module$kotlin_wrappers_kotlin_react_js_legacy.react.RComponent_init_lqgejo$;
+  var Kind_CLASS = Kotlin.Kind.CLASS;
+  var RComponent = $module$kotlin_wrappers_kotlin_react_js_legacy.react.RComponent;
+  var attributesMapOf = $module$kotlin_wrappers_kotlin_react_dom_js_legacy.$$importsForInline$$['kotlinx-html-js'].kotlinx.html.attributesMapOf_jyasbz$;
+  var H3_init = $module$kotlin_wrappers_kotlin_react_dom_js_legacy.$$importsForInline$$['kotlinx-html-js'].kotlinx.html.H3;
+  var RDOMBuilder = $module$kotlin_wrappers_kotlin_react_dom_js_legacy.react.dom.RDOMBuilder;
+  var H1_init = $module$kotlin_wrappers_kotlin_react_dom_js_legacy.$$importsForInline$$['kotlinx-html-js'].kotlinx.html.H1;
+  var DIV_init = $module$kotlin_wrappers_kotlin_react_dom_js_legacy.$$importsForInline$$['kotlinx-html-js'].kotlinx.html.DIV;
   var getKClass = Kotlin.getKClass;
   var Unit = Kotlin.kotlin.Unit;
   var render = $module$kotlin_wrappers_kotlin_react_dom_js_legacy.react.dom.render_2955dm$;
-  var Kind_CLASS = Kotlin.Kind.CLASS;
   var InputType = $module$kotlinx_html_js.kotlinx.html.InputType;
   var throwCCE = Kotlin.throwCCE;
   var set_onChangeFunction = $module$kotlinx_html_js.kotlinx.html.js.set_onChangeFunction_pszlq2$;
-  var RComponent_init = $module$kotlin_wrappers_kotlin_react_js_legacy.react.RComponent_init_8bz2yq$;
-  var RComponent = $module$kotlin_wrappers_kotlin_react_js_legacy.react.RComponent;
-  var attributesMapOf = $module$kotlin_wrappers_kotlin_react_dom_js_legacy.$$importsForInline$$['kotlinx-html-js'].kotlinx.html.attributesMapOf_jyasbz$;
-  var DIV_init = $module$kotlin_wrappers_kotlin_react_dom_js_legacy.$$importsForInline$$['kotlinx-html-js'].kotlinx.html.DIV;
-  var RDOMBuilder = $module$kotlin_wrappers_kotlin_react_dom_js_legacy.react.dom.RDOMBuilder;
+  var RComponent_init_0 = $module$kotlin_wrappers_kotlin_react_js_legacy.react.RComponent_init_8bz2yq$;
   var enumEncode = $module$kotlin_wrappers_kotlin_react_dom_js_legacy.$$importsForInline$$['kotlinx-html-js'].kotlinx.html.attributes.enumEncode_m4whry$;
   var attributesMapOf_0 = $module$kotlin_wrappers_kotlin_react_dom_js_legacy.$$importsForInline$$['kotlinx-html-js'].kotlinx.html.attributesMapOf_alerag$;
   var INPUT_init = $module$kotlin_wrappers_kotlin_react_dom_js_legacy.$$importsForInline$$['kotlinx-html-js'].kotlinx.html.INPUT;
+  App.prototype = Object.create(RComponent.prototype);
+  App.prototype.constructor = App;
   Welcome.prototype = Object.create(RComponent.prototype);
   Welcome.prototype.constructor = Welcome;
+  function h3$lambda(closure$classes) {
+    return function (it) {
+      return new H3_init(attributesMapOf('class', closure$classes), it);
+    };
+  }
+  function h1$lambda(closure$classes) {
+    return function (it) {
+      return new H1_init(attributesMapOf('class', closure$classes), it);
+    };
+  }
+  function div$lambda(closure$classes) {
+    return function (it) {
+      return new DIV_init(attributesMapOf('class', closure$classes), it);
+    };
+  }
+  function App() {
+    RComponent_init(this);
+  }
+  App.prototype.init_bc6fkx$ = function ($receiver) {
+    var mainScope = MainScope();
+  };
+  App.prototype.render_ss14n$ = function ($receiver) {
+    var $receiver_0 = RDOMBuilder.Companion.invoke_f6ihu2$(h1$lambda(null));
+    $receiver_0.unaryPlus_pdl1vz$('KotlinConf Explorer');
+    $receiver.child_52psg1$($receiver_0.create());
+    var $receiver_0_0 = RDOMBuilder.Companion.invoke_f6ihu2$(div$lambda(null));
+    var $receiver_0_1 = RDOMBuilder.Companion.invoke_f6ihu2$(h3$lambda(null));
+    $receiver_0_1.unaryPlus_pdl1vz$('Videos to watch');
+    $receiver_0_0.child_52psg1$($receiver_0_1.create());
+    var $receiver_0_2 = RDOMBuilder.Companion.invoke_f6ihu2$(h3$lambda(null));
+    $receiver_0_2.unaryPlus_pdl1vz$('Videos watched');
+    $receiver_0_0.child_52psg1$($receiver_0_2.create());
+    $receiver.child_52psg1$($receiver_0_0.create());
+  };
+  App.$metadata$ = {
+    kind: Kind_CLASS,
+    simpleName: 'App',
+    interfaces: [RComponent]
+  };
   function main$lambda$lambda$lambda$lambda($receiver) {
     $receiver.name = 'Kotlin/JS';
     return Unit;
@@ -53,7 +100,17 @@
   function main() {
     window.onload = main$lambda;
   }
-  function div$lambda(closure$classes) {
+  function main$lambda$lambda_0($receiver) {
+    return Unit;
+  }
+  function main$lambda_0($receiver) {
+    $receiver.child_ssazr1$(getKClass(App), main$lambda$lambda_0);
+    return Unit;
+  }
+  function main() {
+    render(document.getElementById('root'), void 0, main$lambda_0);
+  }
+  function div$lambda_0(closure$classes) {
     return function (it) {
       return new DIV_init(attributesMapOf('class', closure$classes), it);
     };
@@ -89,7 +146,7 @@
     return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && Kotlin.equals(this.name, other.name))));
   };
   function Welcome(props) {
-    RComponent_init(props, this);
+    RComponent_init_0(props, this);
     this.state = new WelcomeState(props.name);
   }
   function Welcome$render$lambda$lambda$lambda(this$Welcome) {
@@ -101,7 +158,7 @@
     };
   }
   Welcome.prototype.render_ss14n$ = function ($receiver) {
-    var $receiver_0 = RDOMBuilder.Companion.invoke_f6ihu2$(div$lambda(null));
+    var $receiver_0 = RDOMBuilder.Companion.invoke_f6ihu2$(div$lambda_0(null));
     $receiver_0.unaryPlus_pdl1vz$('Hello, ' + this.state.name);
     $receiver.child_52psg1$($receiver_0.create());
     var $receiver_0_0 = RDOMBuilder.Companion.invoke_f6ihu2$(input$lambda(null, null, null, null, null));
@@ -116,9 +173,10 @@
     simpleName: 'Welcome',
     interfaces: [RComponent]
   };
+  $$importsForInline$$['kotlin-wrappers-kotlin-react-dom-js-legacy'] = $module$kotlin_wrappers_kotlin_react_dom_js_legacy;
+  _.App = App;
   _.main = main;
   _.WelcomeState = WelcomeState;
-  $$importsForInline$$['kotlin-wrappers-kotlin-react-dom-js-legacy'] = $module$kotlin_wrappers_kotlin_react_dom_js_legacy;
   _.Welcome = Welcome;
   main();
   Kotlin.defineModule('Reack_and_webpack', _);

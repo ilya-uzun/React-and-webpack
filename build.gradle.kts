@@ -1,13 +1,16 @@
 plugins {
     kotlin("js") version "1.5.10"
-    //id("org.jetbrains.kotlin.multiplatform") version "1.5.10"
 }
 
 group = "me.ilya"
 version = "1.0-SNAPSHOT"
 
 repositories {
+    //mavenCentral()
+    maven { setUrl("https://dl.bintray.com/kotlin/kotlin-eap") }
+    maven("https://kotlin.bintray.com/kotlin-js-wrappers/")
     mavenCentral()
+    jcenter()
 }
 
 dependencies {

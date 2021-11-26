@@ -542,6 +542,9 @@
   Kotlin.coroutineReceiver = function (qualifier) {
     throwMarkerError();
   };
+  Kotlin.setCoroutineResult = function (value, qualifier) {
+    throwMarkerError();
+  };
   function throwMarkerError() {
     throw new Error('This marker function should never been called. ' + 'Looks like compiler did not eliminate it properly. ' + 'Please, report an issue if you caught this exception.');
   }
@@ -586,7 +589,16 @@
     if (bufInt32[lowIndex] !== 0) {
       lowIndex = 1;
       highIndex = 0;
-    }Kotlin.numberHashCode = function (obj) {
+    }Kotlin.doubleToRawBits = function (value) {
+      bufFloat64[0] = value;
+      return Kotlin.Long.fromBits(bufInt32[lowIndex], bufInt32[highIndex]);
+    };
+    Kotlin.doubleFromBits = function (value) {
+      bufInt32[lowIndex] = value.low_;
+      bufInt32[highIndex] = value.high_;
+      return bufFloat64[0];
+    };
+    Kotlin.numberHashCode = function (obj) {
       if ((obj | 0) === obj) {
         return obj | 0;
       } else {
@@ -848,6 +860,15 @@
       }}
   }());
   Kotlin.Kind = {CLASS: 'class', INTERFACE: 'interface', OBJECT: 'object'};
+  Kotlin.callGetter = function (thisObject, klass, propertyName) {
+    var propertyDescriptor = Object.getOwnPropertyDescriptor(klass, propertyName);
+    if (propertyDescriptor != null && propertyDescriptor.get != null) {
+      return propertyDescriptor.get.call(thisObject);
+    }propertyDescriptor = Object.getOwnPropertyDescriptor(thisObject, propertyName);
+    if (propertyDescriptor != null && 'value' in propertyDescriptor) {
+      return thisObject[propertyName];
+    }return Kotlin.callGetter(thisObject, Object.getPrototypeOf(klass), propertyName);
+  };
   function isInheritanceFromInterface(ctor, iface) {
     if (ctor === iface)
       return true;
@@ -955,7 +976,23 @@
       }
       return array;
     }
+    function DoubleCompanionObject() {
+      DoubleCompanionObject_instance = this;
+      this.MIN_VALUE = 4.9E-324;
+      this.MAX_VALUE = 1.7976931348623157E308;
+      this.POSITIVE_INFINITY = 1.0 / 0.0;
+      this.NEGATIVE_INFINITY = -1.0 / 0.0;
+      this.NaN = -(0.0 / 0.0);
+      this.SIZE_BYTES = 8;
+      this.SIZE_BITS = 64;
+    }
+    DoubleCompanionObject.$metadata$ = {kind: Kind_OBJECT, simpleName: 'DoubleCompanionObject', interfaces: []};
     var DoubleCompanionObject_instance = null;
+    function DoubleCompanionObject_getInstance() {
+      if (DoubleCompanionObject_instance === null) {
+        new DoubleCompanionObject();
+      }return DoubleCompanionObject_instance;
+    }
     var FloatCompanionObject_instance = null;
     var IntCompanionObject_instance = null;
     var LongCompanionObject_instance = null;
@@ -990,6 +1027,7 @@
     _.newArray = newArray;
     var package$js = package$kotlin.js || (package$kotlin.js = {});
     var package$internal = package$js.internal || (package$js.internal = {});
+    Object.defineProperty(package$internal, 'DoubleCompanionObject', {get: DoubleCompanionObject_getInstance});
     Object.defineProperty(package$internal, 'CharCompanionObject', {get: CharCompanionObject_getInstance});
   }());
   (function () {
@@ -999,6 +1037,7 @@
     var equals = Kotlin.equals;
     var toBoxedChar = Kotlin.toBoxedChar;
     var unboxChar = Kotlin.unboxChar;
+    var kotlin_js_internal_DoubleCompanionObject = Kotlin.kotlin.js.internal.DoubleCompanionObject;
     var L0 = Kotlin.Long.ZERO;
     var JsMath = Math;
     var Kind_CLASS = Kotlin.Kind.CLASS;
@@ -1028,6 +1067,7 @@
     var Throwable = Error;
     var contentToString = Kotlin.arrayToString;
     var hashCode = Kotlin.hashCode;
+    var toRawBits = Kotlin.doubleToRawBits;
     var kotlin_js_internal_CharCompanionObject = Kotlin.kotlin.js.internal.CharCompanionObject;
     var L_7390468764508069838 = new Kotlin.Long(-1478467534, -1720727600);
     var L8246714829545688274 = new Kotlin.Long(-888910638, 1920087921);
@@ -1157,8 +1197,14 @@
     AbstractMap$get_AbstractMap$keys$ObjectLiteral.prototype.constructor = AbstractMap$get_AbstractMap$keys$ObjectLiteral;
     AbstractMap$get_AbstractMap$values$ObjectLiteral.prototype = Object.create(AbstractCollection.prototype);
     AbstractMap$get_AbstractMap$values$ObjectLiteral.prototype.constructor = AbstractMap$get_AbstractMap$values$ObjectLiteral;
+    SequenceBuilderIterator.prototype = Object.create(SequenceScope.prototype);
+    SequenceBuilderIterator.prototype.constructor = SequenceBuilderIterator;
     CoroutineSingletons.prototype = Object.create(Enum.prototype);
     CoroutineSingletons.prototype.constructor = CoroutineSingletons;
+    Random$Default.prototype = Object.create(Random.prototype);
+    Random$Default.prototype.constructor = Random$Default;
+    XorWowRandom.prototype = Object.create(Random.prototype);
+    XorWowRandom.prototype.constructor = XorWowRandom;
     NotImplementedError.prototype = Object.create(Error_0.prototype);
     NotImplementedError.prototype.constructor = NotImplementedError;
     function contains($receiver, element) {
@@ -1232,6 +1278,12 @@
       if ($receiver.isEmpty())
         throw new NoSuchElementException('List is empty.');
       return $receiver.get_za3lpa$(0);
+    }
+    function shuffle_17($receiver, random) {
+      for (var i = get_lastIndex_12($receiver); i >= 1; i--) {
+        var j = random.nextInt_za3lpa$(i + 1 | 0);
+        $receiver.set_wxm5ur$(j, $receiver.set_wxm5ur$(i, $receiver.get_za3lpa$(j)));
+      }
     }
     function toCollection_8($receiver, destination) {
       var tmp$;
@@ -1329,6 +1381,15 @@
     }
     function coerceAtLeast_2($receiver, minimumValue) {
       return $receiver < minimumValue ? minimumValue : $receiver;
+    }
+    function coerceIn_3($receiver, minimumValue, maximumValue) {
+      if (minimumValue.compareTo_11rb$(maximumValue) > 0)
+        throw IllegalArgumentException_init_0('Cannot coerce value to an empty range: maximum ' + maximumValue.toString() + ' is less than minimum ' + minimumValue.toString() + '.');
+      if ($receiver.compareTo_11rb$(minimumValue) < 0)
+        return minimumValue;
+      if ($receiver.compareTo_11rb$(maximumValue) > 0)
+        return maximumValue;
+      return $receiver;
     }
     function take_9($receiver, n) {
       var tmp$;
@@ -2150,6 +2211,45 @@
         new CompletedContinuation();
       }return CompletedContinuation_instance;
     }
+    createCoroutineFromSuspendFunction$ObjectLiteral.prototype = Object.create(CoroutineImpl.prototype);
+    createCoroutineFromSuspendFunction$ObjectLiteral.prototype.constructor = createCoroutineFromSuspendFunction$ObjectLiteral;
+    function createCoroutineFromSuspendFunction$ObjectLiteral(closure$block, resultContinuation) {
+      this.closure$block = closure$block;
+      CoroutineImpl.call(this, resultContinuation);
+    }
+    createCoroutineFromSuspendFunction$ObjectLiteral.prototype.doResume = function () {
+      var tmp$;
+      if ((tmp$ = this.exception_0) != null) {
+        throw tmp$;
+      }return this.closure$block();
+    };
+    createCoroutineFromSuspendFunction$ObjectLiteral.$metadata$ = {kind: Kind_CLASS, interfaces: [CoroutineImpl]};
+    function createCoroutineUnintercepted$lambda(this$createCoroutineUnintercepted, closure$completion) {
+      return function () {
+        return this$createCoroutineUnintercepted(closure$completion);
+      };
+    }
+    function createCoroutineUnintercepted($receiver, completion) {
+      if ($receiver.length == 2) {
+        return $receiver(completion, true);
+      } else {
+        var tmp$;
+        return new createCoroutineFromSuspendFunction$ObjectLiteral(createCoroutineUnintercepted$lambda($receiver, completion), Kotlin.isType(tmp$ = completion, Continuation) ? tmp$ : throwCCE_0());
+      }
+    }
+    function createCoroutineUnintercepted$lambda_0(this$createCoroutineUnintercepted, closure$receiver, closure$completion) {
+      return function () {
+        return this$createCoroutineUnintercepted(closure$receiver, closure$completion);
+      };
+    }
+    function createCoroutineUnintercepted_0($receiver, receiver, completion) {
+      if ($receiver.length == 3) {
+        return $receiver(receiver, completion, true);
+      } else {
+        var tmp$;
+        return new createCoroutineFromSuspendFunction$ObjectLiteral(createCoroutineUnintercepted$lambda_0($receiver, receiver, completion), Kotlin.isType(tmp$ = completion, Continuation) ? tmp$ : throwCCE_0());
+      }
+    }
     function intercepted($receiver) {
       var tmp$, tmp$_0, tmp$_1;
       return (tmp$_1 = (tmp$_0 = Kotlin.isType(tmp$ = $receiver, CoroutineImpl) ? tmp$ : null) != null ? tmp$_0.intercepted() : null) != null ? tmp$_1 : $receiver;
@@ -2311,6 +2411,12 @@
     }
     function setOf(element) {
       return hashSetOf_0([element]);
+    }
+    function mapOf(pair) {
+      return hashMapOf_0([pair]);
+    }
+    function shuffle_26($receiver) {
+      shuffle_17($receiver, Random$Default_getInstance());
     }
     function arrayCopy(source, destination, destinationOffset, startIndex, endIndex) {
       AbstractList$Companion_getInstance().checkRangeIndexes_cub51b$(startIndex, endIndex, source.length);
@@ -3040,6 +3146,11 @@
         throw IllegalArgumentException_init_0(message_0.toString());
       }return $this;
     }
+    function HashMap_init_2(initialCapacity, $this) {
+      $this = $this || Object.create(HashMap.prototype);
+      HashMap_init_1(initialCapacity, 0.0, $this);
+      return $this;
+    }
     function HashSet() {
       this.map_8be2vx$ = null;
     }
@@ -3631,8 +3742,33 @@
     function Serializable() {
     }
     Serializable.$metadata$ = {kind: Kind_INTERFACE, simpleName: 'Serializable', interfaces: []};
+    function nextDown($receiver) {
+      if (isNaN_0($receiver) || $receiver === kotlin_js_internal_DoubleCompanionObject.NEGATIVE_INFINITY)
+        return $receiver;
+      else if ($receiver === 0.0)
+        return -kotlin_js_internal_DoubleCompanionObject.MIN_VALUE;
+      else {
+        var bits = toRawBits($receiver).add(Kotlin.Long.fromInt($receiver > 0 ? -1 : 1));
+        return Kotlin.doubleFromBits(bits);
+      }
+    }
+    function isNaN_0($receiver) {
+      return $receiver !== $receiver;
+    }
+    function isInfinite($receiver) {
+      return $receiver === kotlin_js_internal_DoubleCompanionObject.POSITIVE_INFINITY || $receiver === kotlin_js_internal_DoubleCompanionObject.NEGATIVE_INFINITY;
+    }
+    function isFinite($receiver) {
+      return !isInfinite($receiver) && !isNaN_0($receiver);
+    }
+    function defaultPlatformRandom() {
+      return Random_0(Math.random() * Math.pow(2, 32) | 0);
+    }
     var INV_2_26;
     var INV_2_53;
+    function doubleFromParts(hi26, low27) {
+      return hi26 * INV_2_26 + low27 * INV_2_53;
+    }
     function get_js($receiver) {
       var tmp$;
       return (Kotlin.isType(tmp$ = $receiver, KClassImpl) ? tmp$ : throwCCE_0()).jClass;
@@ -3879,6 +4015,57 @@
           return NothingKClassImpl_getInstance();
         default:return new ErrorKClass();
       }
+    }
+    function getKClassFromExpression(e) {
+      var tmp$;
+      switch (typeof e) {
+        case 'string':
+          tmp$ = PrimitiveClasses_getInstance().stringClass;
+          break;
+        case 'number':
+          tmp$ = (e | 0) === e ? PrimitiveClasses_getInstance().intClass : PrimitiveClasses_getInstance().doubleClass;
+          break;
+        case 'boolean':
+          tmp$ = PrimitiveClasses_getInstance().booleanClass;
+          break;
+        case 'function':
+          tmp$ = PrimitiveClasses_getInstance().functionClass(e.length);
+          break;
+        default:if (Kotlin.isBooleanArray(e))
+            tmp$ = PrimitiveClasses_getInstance().booleanArrayClass;
+          else if (Kotlin.isCharArray(e))
+            tmp$ = PrimitiveClasses_getInstance().charArrayClass;
+          else if (Kotlin.isByteArray(e))
+            tmp$ = PrimitiveClasses_getInstance().byteArrayClass;
+          else if (Kotlin.isShortArray(e))
+            tmp$ = PrimitiveClasses_getInstance().shortArrayClass;
+          else if (Kotlin.isIntArray(e))
+            tmp$ = PrimitiveClasses_getInstance().intArrayClass;
+          else if (Kotlin.isLongArray(e))
+            tmp$ = PrimitiveClasses_getInstance().longArrayClass;
+          else if (Kotlin.isFloatArray(e))
+            tmp$ = PrimitiveClasses_getInstance().floatArrayClass;
+          else if (Kotlin.isDoubleArray(e))
+            tmp$ = PrimitiveClasses_getInstance().doubleArrayClass;
+          else if (Kotlin.isType(e, KClass))
+            tmp$ = getKClass(KClass);
+          else if (Kotlin.isArray(e))
+            tmp$ = PrimitiveClasses_getInstance().arrayClass;
+          else {
+            var constructor = Object.getPrototypeOf(e).constructor;
+            if (constructor === Object)
+              tmp$ = PrimitiveClasses_getInstance().anyClass;
+            else if (constructor === Error)
+              tmp$ = PrimitiveClasses_getInstance().throwableClass;
+            else {
+              var jsClass = constructor;
+              tmp$ = getKClass1(jsClass);
+            }
+          }
+
+          break;
+      }
+      return tmp$;
     }
     function getKClass1(jClass) {
       var tmp$;
@@ -4167,6 +4354,24 @@
     }
     function isLowSurrogate($receiver) {
       return (new CharRange(kotlin_js_internal_CharCompanionObject.MIN_LOW_SURROGATE, kotlin_js_internal_CharCompanionObject.MAX_LOW_SURROGATE)).contains_mef7kx$($receiver);
+    }
+    function checkRadix(radix) {
+      if (!(2 <= radix && radix <= 36)) {
+        throw IllegalArgumentException_init_0('radix ' + radix + ' was not in valid range 2..36');
+      }return radix;
+    }
+    function digitOf(char, radix) {
+      var tmp$;
+      if (char >= 48 && char <= 57)
+        tmp$ = char - 48;
+      else if (char >= 65 && char <= 90)
+        tmp$ = char - 65 + 10 | 0;
+      else if (char >= 97 && char <= 122)
+        tmp$ = char - 97 + 10 | 0;
+      else
+        tmp$ = -1;
+      var it = tmp$;
+      return it >= radix ? -1 : it;
     }
     var RegexOption$IGNORE_CASE_instance;
     var RegexOption$MULTILINE_instance;
@@ -5077,6 +5282,32 @@
     function throwIndexOverflow() {
       throw new ArithmeticException('Index overflow has happened.');
     }
+    function IndexedValue(index, value) {
+      this.index = index;
+      this.value = value;
+    }
+    IndexedValue.$metadata$ = {kind: Kind_CLASS, simpleName: 'IndexedValue', interfaces: []};
+    IndexedValue.prototype.component1 = function () {
+      return this.index;
+    };
+    IndexedValue.prototype.component2 = function () {
+      return this.value;
+    };
+    IndexedValue.prototype.copy_wxm5ur$ = function (index, value) {
+      return new IndexedValue(index === void 0 ? this.index : index, value === void 0 ? this.value : value);
+    };
+    IndexedValue.prototype.toString = function () {
+      return 'IndexedValue(index=' + Kotlin.toString(this.index) + (', value=' + Kotlin.toString(this.value)) + ')';
+    };
+    IndexedValue.prototype.hashCode = function () {
+      var result = 0;
+      result = result * 31 + Kotlin.hashCode(this.index) | 0;
+      result = result * 31 + Kotlin.hashCode(this.value) | 0;
+      return result;
+    };
+    IndexedValue.prototype.equals = function (other) {
+      return this === other || (other !== null && (typeof other === 'object' && (Object.getPrototypeOf(this) === Object.getPrototypeOf(other) && (Kotlin.equals(this.index, other.index) && Kotlin.equals(this.value, other.value)))));
+    };
     function collectionSizeOrDefault($receiver, default_0) {
       return Kotlin.isType($receiver, Collection) ? $receiver.size : default_0;
     }
@@ -5146,6 +5377,11 @@
     function mapOf_0(pairs) {
       return pairs.length > 0 ? toMap_2(pairs, LinkedHashMap_init_2(mapCapacity(pairs.length))) : emptyMap();
     }
+    function hashMapOf_0(pairs) {
+      var $receiver = HashMap_init_2(mapCapacity(pairs.length));
+      putAll($receiver, pairs);
+      return $receiver;
+    }
     function putAll($receiver, pairs) {
       var tmp$;
       for (tmp$ = 0; tmp$ !== pairs.length; ++tmp$) {
@@ -5154,12 +5390,50 @@
         $receiver.put_xwzc9p$(key, value);
       }
     }
+    function putAll_0($receiver, pairs) {
+      var tmp$;
+      tmp$ = pairs.iterator();
+      while (tmp$.hasNext()) {
+        var tmp$_0 = tmp$.next();
+        var key = tmp$_0.component1(), value = tmp$_0.component2();
+        $receiver.put_xwzc9p$(key, value);
+      }
+    }
+    function toMap($receiver) {
+      var tmp$;
+      if (Kotlin.isType($receiver, Collection)) {
+        switch ($receiver.size) {
+          case 0:
+            tmp$ = emptyMap();
+            break;
+          case 1:
+            tmp$ = mapOf(Kotlin.isType($receiver, List) ? $receiver.get_za3lpa$(0) : $receiver.iterator().next());
+            break;
+          default:tmp$ = toMap_0($receiver, LinkedHashMap_init_2(mapCapacity($receiver.size)));
+            break;
+        }
+        return tmp$;
+      }return optimizeReadOnlyMap(toMap_0($receiver, LinkedHashMap_init()));
+    }
+    function toMap_0($receiver, destination) {
+      putAll_0(destination, $receiver);
+      return destination;
+    }
     function toMap_2($receiver, destination) {
       putAll(destination, $receiver);
       return destination;
     }
     function toMutableMap($receiver) {
       return LinkedHashMap_init_3($receiver);
+    }
+    function optimizeReadOnlyMap($receiver) {
+      switch ($receiver.size) {
+        case 0:
+          return emptyMap();
+        case 1:
+          return $receiver;
+        default:return $receiver;
+      }
     }
     function addAll_1($receiver, elements) {
       return $receiver.addAll_brywnq$(asList(elements));
@@ -5206,12 +5480,143 @@
     function Sequence() {
     }
     Sequence.$metadata$ = {kind: Kind_INTERFACE, simpleName: 'Sequence', interfaces: []};
+    function Sequence$ObjectLiteral_2(closure$iterator) {
+      this.closure$iterator = closure$iterator;
+    }
+    Sequence$ObjectLiteral_2.prototype.iterator = function () {
+      return this.closure$iterator();
+    };
+    Sequence$ObjectLiteral_2.$metadata$ = {kind: Kind_CLASS, interfaces: [Sequence]};
+    function sequence$lambda(closure$block) {
+      return function () {
+        return iterator_3(closure$block);
+      };
+    }
+    function sequence(block) {
+      return new Sequence$ObjectLiteral_2(sequence$lambda(block));
+    }
+    function iterator_3(block) {
+      var iterator = new SequenceBuilderIterator();
+      iterator.nextStep = createCoroutineUnintercepted_0(block, iterator, iterator);
+      return iterator;
+    }
+    function SequenceScope() {
+    }
+    SequenceScope.prototype.yieldAll_p1ys8y$ = function (elements, continuation) {
+      if (Kotlin.isType(elements, Collection) && elements.isEmpty())
+        return;
+      return this.yieldAll_1phuh2$(elements.iterator(), continuation);
+    };
+    SequenceScope.prototype.yieldAll_swo9gw$ = function (sequence, continuation) {
+      return this.yieldAll_1phuh2$(sequence.iterator(), continuation);
+    };
+    SequenceScope.$metadata$ = {kind: Kind_CLASS, simpleName: 'SequenceScope', interfaces: []};
     var State_NotReady;
     var State_ManyNotReady;
     var State_ManyReady;
     var State_Ready;
     var State_Done;
     var State_Failed;
+    function SequenceBuilderIterator() {
+      SequenceScope.call(this);
+      this.state_0 = 0;
+      this.nextValue_0 = null;
+      this.nextIterator_0 = null;
+      this.nextStep = null;
+    }
+    SequenceBuilderIterator.prototype.hasNext = function () {
+      while (true) {
+        switch (this.state_0) {
+          case 0:
+            break;
+          case 1:
+            if (ensureNotNull(this.nextIterator_0).hasNext()) {
+              this.state_0 = 2;
+              return true;
+            } else {
+              this.nextIterator_0 = null;
+            }
+
+            break;
+          case 4:
+            return false;
+          case 3:
+          case 2:
+            return true;
+          default:throw this.exceptionalState_0();
+        }
+        this.state_0 = 5;
+        var step = ensureNotNull(this.nextStep);
+        this.nextStep = null;
+        step.resumeWith_tl1gpc$(new Result(Unit_getInstance()));
+      }
+    };
+    SequenceBuilderIterator.prototype.next = function () {
+      var tmp$;
+      switch (this.state_0) {
+        case 0:
+        case 1:
+          return this.nextNotReady_0();
+        case 2:
+          this.state_0 = 1;
+          return ensureNotNull(this.nextIterator_0).next();
+        case 3:
+          this.state_0 = 0;
+          var result = (tmp$ = this.nextValue_0) == null || Kotlin.isType(tmp$, Any) ? tmp$ : throwCCE_0();
+          this.nextValue_0 = null;
+          return result;
+        default:throw this.exceptionalState_0();
+      }
+    };
+    SequenceBuilderIterator.prototype.nextNotReady_0 = function () {
+      if (!this.hasNext())
+        throw NoSuchElementException_init();
+      else
+        return this.next();
+    };
+    SequenceBuilderIterator.prototype.exceptionalState_0 = function () {
+      switch (this.state_0) {
+        case 4:
+          return NoSuchElementException_init();
+        case 5:
+          return IllegalStateException_init_0('Iterator has failed.');
+        default:return IllegalStateException_init_0('Unexpected state of the iterator: ' + this.state_0);
+      }
+    };
+    function SequenceBuilderIterator$yield$lambda(this$SequenceBuilderIterator) {
+      return function (c) {
+        this$SequenceBuilderIterator.nextStep = c;
+        return get_COROUTINE_SUSPENDED();
+      };
+    }
+    SequenceBuilderIterator.prototype.yield_11rb$ = function (value, continuation) {
+      this.nextValue_0 = value;
+      this.state_0 = 3;
+      return SequenceBuilderIterator$yield$lambda(this)(continuation);
+    };
+    function SequenceBuilderIterator$yieldAll$lambda(this$SequenceBuilderIterator) {
+      return function (c) {
+        this$SequenceBuilderIterator.nextStep = c;
+        return get_COROUTINE_SUSPENDED();
+      };
+    }
+    SequenceBuilderIterator.prototype.yieldAll_1phuh2$ = function (iterator, continuation) {
+      if (!iterator.hasNext())
+        return;
+      this.nextIterator_0 = iterator;
+      this.state_0 = 2;
+      return SequenceBuilderIterator$yieldAll$lambda(this)(continuation);
+    };
+    SequenceBuilderIterator.prototype.resumeWith_tl1gpc$ = function (result) {
+      var tmp$;
+      throwOnFailure(result);
+      (tmp$ = result.value) == null || Kotlin.isType(tmp$, Any) ? tmp$ : throwCCE();
+      this.state_0 = 4;
+    };
+    Object.defineProperty(SequenceBuilderIterator.prototype, 'context', {configurable: true, get: function () {
+      return EmptyCoroutineContext_getInstance();
+    }});
+    SequenceBuilderIterator.$metadata$ = {kind: Kind_CLASS, simpleName: 'SequenceBuilderIterator', interfaces: [Continuation, Iterator, SequenceScope]};
     function emptySequence() {
       return EmptySequence_getInstance();
     }
@@ -5506,6 +5911,20 @@
         new ContinuationInterceptor$Key();
       }return ContinuationInterceptor$Key_instance;
     }
+    ContinuationInterceptor.prototype.releaseInterceptedContinuation_k98bjh$ = function (continuation) {
+    };
+    ContinuationInterceptor.prototype.get_j3r2sn$ = function (key) {
+      var tmp$, tmp$_0;
+      if (Kotlin.isType(key, AbstractCoroutineContextKey)) {
+        return key.isSubKey_i2ksv9$(this.key) ? Kotlin.isType(tmp$ = key.tryCast_m1180o$(this), CoroutineContext$Element) ? tmp$ : null : null;
+      }return ContinuationInterceptor$Key_getInstance() === key ? Kotlin.isType(tmp$_0 = this, CoroutineContext$Element) ? tmp$_0 : throwCCE_0() : null;
+    };
+    ContinuationInterceptor.prototype.minusKey_yeqjby$ = function (key) {
+      if (Kotlin.isType(key, AbstractCoroutineContextKey)) {
+        return key.isSubKey_i2ksv9$(this.key) && key.tryCast_m1180o$(this) != null ? EmptyCoroutineContext_getInstance() : this;
+      }return ContinuationInterceptor$Key_getInstance() === key ? EmptyCoroutineContext_getInstance() : this;
+    };
+    ContinuationInterceptor.$metadata$ = {kind: Kind_INTERFACE, simpleName: 'ContinuationInterceptor', interfaces: [CoroutineContext$Element]};
     function CoroutineContext() {
     }
     function CoroutineContext$plus$lambda(acc, element) {
@@ -5545,6 +5964,21 @@
     function AbstractCoroutineContextElement(key) {
       this.key_no4tas$_0 = key;
     }
+    Object.defineProperty(AbstractCoroutineContextElement.prototype, 'key', {get: function () {
+      return this.key_no4tas$_0;
+    }});
+    AbstractCoroutineContextElement.$metadata$ = {kind: Kind_CLASS, simpleName: 'AbstractCoroutineContextElement', interfaces: [CoroutineContext$Element]};
+    function AbstractCoroutineContextKey(baseKey, safeCast) {
+      this.safeCast_9rw4bk$_0 = safeCast;
+      this.topmostKey_3x72pn$_0 = Kotlin.isType(baseKey, AbstractCoroutineContextKey) ? baseKey.topmostKey_3x72pn$_0 : baseKey;
+    }
+    AbstractCoroutineContextKey.prototype.tryCast_m1180o$ = function (element) {
+      return this.safeCast_9rw4bk$_0(element);
+    };
+    AbstractCoroutineContextKey.prototype.isSubKey_i2ksv9$ = function (key) {
+      return key === this || this.topmostKey_3x72pn$_0 === key;
+    };
+    AbstractCoroutineContextKey.$metadata$ = {kind: Kind_CLASS, simpleName: 'AbstractCoroutineContextKey', interfaces: [CoroutineContext$Key]};
     function EmptyCoroutineContext() {
       EmptyCoroutineContext_instance = this;
       this.serialVersionUID_0 = L0;
@@ -5754,9 +6188,303 @@
     var RequireKotlinVersionKind$COMPILER_VERSION_instance;
     var RequireKotlinVersionKind$API_VERSION_instance;
     var Delegates_instance = null;
+    function Random() {
+      Random$Default_getInstance();
+    }
+    Random.prototype.nextInt = function () {
+      return this.nextBits_za3lpa$(32);
+    };
+    Random.prototype.nextInt_za3lpa$ = function (until) {
+      return this.nextInt_vux9f0$(0, until);
+    };
+    Random.prototype.nextInt_vux9f0$ = function (from, until) {
+      var tmp$;
+      checkRangeBounds(from, until);
+      var n = until - from | 0;
+      if (n > 0 || n === -2147483648) {
+        if ((n & (-n | 0)) === n) {
+          var bitCount = fastLog2(n);
+          tmp$ = this.nextBits_za3lpa$(bitCount);
+        } else {
+          var v;
+          do {
+            var bits = this.nextInt() >>> 1;
+            v = bits % n;
+          }
+           while ((bits - v + (n - 1) | 0) < 0);
+          tmp$ = v;
+        }
+        var rnd = tmp$;
+        return from + rnd | 0;
+      } else {
+        while (true) {
+          var rnd_0 = this.nextInt();
+          if (from <= rnd_0 && rnd_0 < until)
+            return rnd_0;
+        }
+      }
+    };
+    Random.prototype.nextLong = function () {
+      return Kotlin.Long.fromInt(this.nextInt()).shiftLeft(32).add(Kotlin.Long.fromInt(this.nextInt()));
+    };
+    Random.prototype.nextLong_s8cxhz$ = function (until) {
+      return this.nextLong_3pjtqy$(L0, until);
+    };
+    Random.prototype.nextLong_3pjtqy$ = function (from, until) {
+      var tmp$;
+      checkRangeBounds_0(from, until);
+      var n = until.subtract(from);
+      if (n.toNumber() > 0) {
+        var rnd;
+        if (equals(n.and(n.unaryMinus()), n)) {
+          var nLow = n.toInt();
+          var nHigh = n.shiftRightUnsigned(32).toInt();
+          if (nLow !== 0) {
+            var bitCount = fastLog2(nLow);
+            tmp$ = Kotlin.Long.fromInt(this.nextBits_za3lpa$(bitCount)).and(L4294967295);
+          } else if (nHigh === 1)
+            tmp$ = Kotlin.Long.fromInt(this.nextInt()).and(L4294967295);
+          else {
+            var bitCount_0 = fastLog2(nHigh);
+            tmp$ = Kotlin.Long.fromInt(this.nextBits_za3lpa$(bitCount_0)).shiftLeft(32).add(Kotlin.Long.fromInt(this.nextInt()));
+          }
+          rnd = tmp$;
+        } else {
+          var v;
+          do {
+            var bits = this.nextLong().shiftRightUnsigned(1);
+            v = bits.modulo(n);
+          }
+           while (bits.subtract(v).add(n.subtract(Kotlin.Long.fromInt(1))).toNumber() < 0);
+          rnd = v;
+        }
+        return from.add(rnd);
+      } else {
+        while (true) {
+          var rnd_0 = this.nextLong();
+          if (from.lessThanOrEqual(rnd_0) && rnd_0.lessThan(until))
+            return rnd_0;
+        }
+      }
+    };
+    Random.prototype.nextBoolean = function () {
+      return this.nextBits_za3lpa$(1) !== 0;
+    };
+    Random.prototype.nextDouble = function () {
+      return doubleFromParts(this.nextBits_za3lpa$(26), this.nextBits_za3lpa$(27));
+    };
+    Random.prototype.nextDouble_14dthe$ = function (until) {
+      return this.nextDouble_lu1900$(0.0, until);
+    };
+    Random.prototype.nextDouble_lu1900$ = function (from, until) {
+      var tmp$;
+      checkRangeBounds_1(from, until);
+      var size = until - from;
+      if (isInfinite(size) && isFinite(from) && isFinite(until)) {
+        var r1 = this.nextDouble() * (until / 2 - from / 2);
+        tmp$ = from + r1 + r1;
+      } else {
+        tmp$ = from + this.nextDouble() * size;
+      }
+      var r = tmp$;
+      return r >= until ? nextDown(until) : r;
+    };
+    Random.prototype.nextFloat = function () {
+      return this.nextBits_za3lpa$(24) / 16777216;
+    };
+    function Random$nextBytes$lambda(closure$fromIndex, closure$toIndex, closure$array) {
+      return function () {
+        return 'fromIndex (' + closure$fromIndex + ') or toIndex (' + closure$toIndex + ') are out of range: 0..' + closure$array.length + '.';
+      };
+    }
+    Random.prototype.nextBytes_mj6st8$$default = function (array, fromIndex, toIndex) {
+      if (!(0 <= fromIndex && fromIndex <= array.length ? 0 <= toIndex && toIndex <= array.length : false)) {
+        var message = Random$nextBytes$lambda(fromIndex, toIndex, array)();
+        throw IllegalArgumentException_init_0(message.toString());
+      }if (!(fromIndex <= toIndex)) {
+        var message_0 = 'fromIndex (' + fromIndex + ') must be not greater than toIndex (' + toIndex + ').';
+        throw IllegalArgumentException_init_0(message_0.toString());
+      }var steps = (toIndex - fromIndex | 0) / 4 | 0;
+      var position = {v: fromIndex};
+      for (var index = 0; index < steps; index++) {
+        var v = this.nextInt();
+        array[position.v] = toByte(v);
+        array[position.v + 1 | 0] = toByte(v >>> 8);
+        array[position.v + 2 | 0] = toByte(v >>> 16);
+        array[position.v + 3 | 0] = toByte(v >>> 24);
+        position.v = position.v + 4 | 0;
+      }
+      var remainder = toIndex - position.v | 0;
+      var vr = this.nextBits_za3lpa$(remainder * 8 | 0);
+      for (var i = 0; i < remainder; i++) {
+        array[position.v + i | 0] = toByte(vr >>> (i * 8 | 0));
+      }
+      return array;
+    };
+    Random.prototype.nextBytes_mj6st8$ = function (array, fromIndex, toIndex, callback$default) {
+      if (fromIndex === void 0)
+        fromIndex = 0;
+      if (toIndex === void 0)
+        toIndex = array.length;
+      return callback$default ? callback$default(array, fromIndex, toIndex) : this.nextBytes_mj6st8$$default(array, fromIndex, toIndex);
+    };
+    Random.prototype.nextBytes_fqrh44$ = function (array) {
+      return this.nextBytes_mj6st8$(array, 0, array.length);
+    };
+    Random.prototype.nextBytes_za3lpa$ = function (size) {
+      return this.nextBytes_fqrh44$(new Int8Array(size));
+    };
+    function Random$Default() {
+      Random$Default_instance = this;
+      Random.call(this);
+      this.defaultRandom_0 = defaultPlatformRandom();
+    }
+    function Random$Default$Serialized() {
+      Random$Default$Serialized_instance = this;
+      this.serialVersionUID_0 = L0;
+    }
+    Random$Default$Serialized.prototype.readResolve_0 = function () {
+      return Random$Default_getInstance();
+    };
+    Random$Default$Serialized.$metadata$ = {kind: Kind_OBJECT, simpleName: 'Serialized', interfaces: [Serializable]};
     var Random$Default$Serialized_instance = null;
+    function Random$Default$Serialized_getInstance() {
+      if (Random$Default$Serialized_instance === null) {
+        new Random$Default$Serialized();
+      }return Random$Default$Serialized_instance;
+    }
+    Random$Default.prototype.writeReplace_0 = function () {
+      return Random$Default$Serialized_getInstance();
+    };
+    Random$Default.prototype.nextBits_za3lpa$ = function (bitCount) {
+      return this.defaultRandom_0.nextBits_za3lpa$(bitCount);
+    };
+    Random$Default.prototype.nextInt = function () {
+      return this.defaultRandom_0.nextInt();
+    };
+    Random$Default.prototype.nextInt_za3lpa$ = function (until) {
+      return this.defaultRandom_0.nextInt_za3lpa$(until);
+    };
+    Random$Default.prototype.nextInt_vux9f0$ = function (from, until) {
+      return this.defaultRandom_0.nextInt_vux9f0$(from, until);
+    };
+    Random$Default.prototype.nextLong = function () {
+      return this.defaultRandom_0.nextLong();
+    };
+    Random$Default.prototype.nextLong_s8cxhz$ = function (until) {
+      return this.defaultRandom_0.nextLong_s8cxhz$(until);
+    };
+    Random$Default.prototype.nextLong_3pjtqy$ = function (from, until) {
+      return this.defaultRandom_0.nextLong_3pjtqy$(from, until);
+    };
+    Random$Default.prototype.nextBoolean = function () {
+      return this.defaultRandom_0.nextBoolean();
+    };
+    Random$Default.prototype.nextDouble = function () {
+      return this.defaultRandom_0.nextDouble();
+    };
+    Random$Default.prototype.nextDouble_14dthe$ = function (until) {
+      return this.defaultRandom_0.nextDouble_14dthe$(until);
+    };
+    Random$Default.prototype.nextDouble_lu1900$ = function (from, until) {
+      return this.defaultRandom_0.nextDouble_lu1900$(from, until);
+    };
+    Random$Default.prototype.nextFloat = function () {
+      return this.defaultRandom_0.nextFloat();
+    };
+    Random$Default.prototype.nextBytes_fqrh44$ = function (array) {
+      return this.defaultRandom_0.nextBytes_fqrh44$(array);
+    };
+    Random$Default.prototype.nextBytes_za3lpa$ = function (size) {
+      return this.defaultRandom_0.nextBytes_za3lpa$(size);
+    };
+    Random$Default.prototype.nextBytes_mj6st8$$default = function (array, fromIndex, toIndex) {
+      return this.defaultRandom_0.nextBytes_mj6st8$(array, fromIndex, toIndex);
+    };
+    Random$Default.$metadata$ = {kind: Kind_OBJECT, simpleName: 'Default', interfaces: [Serializable, Random]};
     var Random$Default_instance = null;
+    function Random$Default_getInstance() {
+      if (Random$Default_instance === null) {
+        new Random$Default();
+      }return Random$Default_instance;
+    }
+    Random.$metadata$ = {kind: Kind_CLASS, simpleName: 'Random', interfaces: []};
+    function Random_0(seed) {
+      return XorWowRandom_init(seed, seed >> 31);
+    }
+    function fastLog2(value) {
+      return 31 - JsMath.clz32(value) | 0;
+    }
+    function takeUpperBits($receiver, bitCount) {
+      return $receiver >>> 32 - bitCount & (-bitCount | 0) >> 31;
+    }
+    function checkRangeBounds(from, until) {
+      if (!(until > from)) {
+        var message = boundsErrorMessage(from, until);
+        throw IllegalArgumentException_init_0(message.toString());
+      }}
+    function checkRangeBounds_0(from, until) {
+      if (!(until.compareTo_11rb$(from) > 0)) {
+        var message = boundsErrorMessage(from, until);
+        throw IllegalArgumentException_init_0(message.toString());
+      }}
+    function checkRangeBounds_1(from, until) {
+      if (!(until > from)) {
+        var message = boundsErrorMessage(from, until);
+        throw IllegalArgumentException_init_0(message.toString());
+      }}
+    function boundsErrorMessage(from, until) {
+      return 'Random range is empty: [' + from.toString() + ', ' + until.toString() + ').';
+    }
+    function XorWowRandom(x, y, z, w, v, addend) {
+      XorWowRandom$Companion_getInstance();
+      Random.call(this);
+      this.x_0 = x;
+      this.y_0 = y;
+      this.z_0 = z;
+      this.w_0 = w;
+      this.v_0 = v;
+      this.addend_0 = addend;
+      if (!((this.x_0 | this.y_0 | this.z_0 | this.w_0 | this.v_0) !== 0)) {
+        var message = 'Initial state must have at least one non-zero element.';
+        throw IllegalArgumentException_init_0(message.toString());
+      }for (var index = 0; index < 64; index++) {
+        this.nextInt();
+      }
+    }
+    XorWowRandom.prototype.nextInt = function () {
+      var t = this.x_0;
+      t = t ^ t >>> 2;
+      this.x_0 = this.y_0;
+      this.y_0 = this.z_0;
+      this.z_0 = this.w_0;
+      var v0 = this.v_0;
+      this.w_0 = v0;
+      t = t ^ t << 1 ^ v0 ^ v0 << 4;
+      this.v_0 = t;
+      this.addend_0 = this.addend_0 + 362437 | 0;
+      return t + this.addend_0 | 0;
+    };
+    XorWowRandom.prototype.nextBits_za3lpa$ = function (bitCount) {
+      return takeUpperBits(this.nextInt(), bitCount);
+    };
+    function XorWowRandom$Companion() {
+      XorWowRandom$Companion_instance = this;
+      this.serialVersionUID_0 = L0;
+    }
+    XorWowRandom$Companion.$metadata$ = {kind: Kind_OBJECT, simpleName: 'Companion', interfaces: []};
     var XorWowRandom$Companion_instance = null;
+    function XorWowRandom$Companion_getInstance() {
+      if (XorWowRandom$Companion_instance === null) {
+        new XorWowRandom$Companion();
+      }return XorWowRandom$Companion_instance;
+    }
+    XorWowRandom.$metadata$ = {kind: Kind_CLASS, simpleName: 'XorWowRandom', interfaces: [Serializable, Random]};
+    function XorWowRandom_init(seed1, seed2, $this) {
+      $this = $this || Object.create(XorWowRandom.prototype);
+      XorWowRandom.call($this, seed1, seed2, 0, 0, ~seed1, seed1 << 10 ^ seed2 >>> 4);
+      return $this;
+    }
     function ComparableRange(start, endInclusive) {
       this.start_p1gsmm$_0 = start;
       this.endInclusive_jj4lf7$_0 = endInclusive;
@@ -5791,6 +6519,57 @@
       if (!tmp$) {
         tmp$ = String.fromCharCode(thisUpper).toLowerCase().charCodeAt(0) === String.fromCharCode(otherUpper).toLowerCase().charCodeAt(0);
       }return tmp$;
+    }
+    function toLongOrNull($receiver) {
+      return toLongOrNull_0($receiver, 10);
+    }
+    function toLongOrNull_0($receiver, radix) {
+      checkRadix(radix);
+      var length = $receiver.length;
+      if (length === 0)
+        return null;
+      var start;
+      var isNegative;
+      var limit;
+      var firstChar = $receiver.charCodeAt(0);
+      if (firstChar < 48) {
+        if (length === 1)
+          return null;
+        start = 1;
+        if (firstChar === 45) {
+          isNegative = true;
+          limit = Long$Companion$MIN_VALUE;
+        } else if (firstChar === 43) {
+          isNegative = false;
+          limit = L_9223372036854775807;
+        } else
+          return null;
+      } else {
+        start = 0;
+        isNegative = false;
+        limit = L_9223372036854775807;
+      }
+      var limitForMaxRadix = L_256204778801521550;
+      var limitBeforeMul = limitForMaxRadix;
+      var result = L0;
+      for (var i = start; i < length; i++) {
+        var digit = digitOf($receiver.charCodeAt(i), radix);
+        if (digit < 0)
+          return null;
+        if (result.compareTo_11rb$(limitBeforeMul) < 0) {
+          if (equals(limitBeforeMul, limitForMaxRadix)) {
+            limitBeforeMul = limit.div(Kotlin.Long.fromInt(radix));
+            if (result.compareTo_11rb$(limitBeforeMul) < 0) {
+              return null;
+            }} else {
+            return null;
+          }
+        }result = result.multiply(Kotlin.Long.fromInt(radix));
+        if (result.compareTo_11rb$(limit.add(Kotlin.Long.fromInt(digit))) < 0)
+          return null;
+        result = result.subtract(Kotlin.Long.fromInt(digit));
+      }
+      return isNegative ? result : result.unaryMinus();
     }
     function trimStart_2($receiver, chars) {
       var tmp$;
@@ -6050,6 +6829,8 @@
     var package$ranges = package$kotlin.ranges || (package$kotlin.ranges = {});
     package$ranges.reversed_zf1xzc$ = reversed_9;
     package$collections.lastIndexOf_mjy6jw$ = lastIndexOf;
+    var package$random = package$kotlin.random || (package$kotlin.random = {});
+    package$random.Random = Random;
     package$kotlin.IllegalArgumentException_init_pdl1vj$ = IllegalArgumentException_init_0;
     package$collections.emptyList_287e2$ = emptyList;
     package$collections.ArrayList_init_287e2$ = ArrayList_init;
@@ -6066,6 +6847,7 @@
     package$collections.get_lastIndex_55thoc$ = get_lastIndex_12;
     package$collections.first_2p1efm$ = first_18;
     package$collections.checkIndexOverflow_za3lpa$ = checkIndexOverflow;
+    package$collections.shuffle_9jeydg$ = shuffle_17;
     package$collections.toCollection_5cfyqp$ = toCollection_8;
     package$collections.toSet_7wnvza$ = toSet_8;
     package$collections.Collection = Collection;
@@ -6074,6 +6856,7 @@
     package$collections.joinToString_fmv235$ = joinToString_8;
     package$collections.asSequence_7wnvza$ = asSequence_8;
     var package$text = package$kotlin.text || (package$kotlin.text = {});
+    package$ranges.coerceIn_ekzx8g$ = coerceIn_3;
     var package$sequences = package$kotlin.sequences || (package$kotlin.sequences = {});
     package$sequences.Sequence = Sequence;
     package$sequences.take_wuwhe2$ = take_9;
@@ -6082,6 +6865,7 @@
     package$text.get_indices_gw00vp$ = get_indices_13;
     package$text.StringBuilder_init = StringBuilder_init_1;
     var package$js = package$kotlin.js || (package$kotlin.js = {});
+    var package$math = package$kotlin.math || (package$kotlin.math = {});
     package$kotlin.CharSequence = CharSequence;
     package$collections.Iterable = Iterable;
     package$collections.MutableIterable = MutableIterable;
@@ -6144,6 +6928,8 @@
     package$coroutines.CoroutineImpl = CoroutineImpl;
     Object.defineProperty(package$coroutines, 'CompletedContinuation', {get: CompletedContinuation_getInstance});
     var package$intrinsics = package$coroutines.intrinsics || (package$coroutines.intrinsics = {});
+    package$intrinsics.createCoroutineUnintercepted_x18nsh$ = createCoroutineUnintercepted;
+    package$intrinsics.createCoroutineUnintercepted_3a617i$ = createCoroutineUnintercepted_0;
     package$intrinsics.intercepted_f9mg25$ = intercepted;
     package$kotlin.Error_init_pdl1vj$ = Error_init_0;
     package$kotlin.Error = Error_0;
@@ -6170,6 +6956,8 @@
     package$collections.setOf_mh5how$ = setOf;
     package$collections.LinkedHashSet_init_287e2$ = LinkedHashSet_init_0;
     package$collections.LinkedHashSet_init_ww73n8$ = LinkedHashSet_init_3;
+    package$collections.mapOf_x2b85n$ = mapOf;
+    package$collections.shuffle_vvxzk3$ = shuffle_26;
     package$collections.toMutableMap_abgq59$ = toMutableMap;
     package$collections.AbstractMutableCollection = AbstractMutableCollection;
     package$collections.AbstractMutableList = AbstractMutableList;
@@ -6185,6 +6973,7 @@
     package$collections.HashMap_init_va96d4$ = HashMap_init;
     package$collections.HashMap_init_q3lmfv$ = HashMap_init_0;
     package$collections.HashMap_init_xf5xz2$ = HashMap_init_1;
+    package$collections.HashMap_init_bwtc7$ = HashMap_init_2;
     package$collections.HashMap = HashMap;
     package$collections.HashSet_init_2wofer$ = HashSet_init_1;
     package$collections.HashSet_init_ww73n8$ = HashSet_init_2;
@@ -6210,6 +6999,12 @@
     _.throwCCE = throwCCE_0;
     _.throwISE = throwISE;
     package$io.Serializable = Serializable;
+    package$math.nextDown_yrwdxr$ = nextDown;
+    package$kotlin.isNaN_yrwdxr$ = isNaN_0;
+    package$kotlin.isInfinite_yrwdxr$ = isInfinite;
+    package$kotlin.isFinite_yrwdxr$ = isFinite;
+    package$random.defaultPlatformRandom_8be2vx$ = defaultPlatformRandom;
+    package$random.doubleFromParts_6xvm5r$ = doubleFromParts;
     var package$reflect = package$kotlin.reflect || (package$kotlin.reflect = {});
     package$js.get_js_1yb8b7$ = get_js;
     package$reflect.KCallable = KCallable;
@@ -6230,6 +7025,7 @@
     Object.defineProperty(package$internal_1, 'PrimitiveClasses', {get: PrimitiveClasses_getInstance});
     _.getKClass = getKClass;
     _.getKClassM = getKClassM;
+    _.getKClassFromExpression = getKClassFromExpression;
     _.getKClass1 = getKClass1;
     package$js.reset_xjqeni$ = reset;
     package$text.Appendable = Appendable;
@@ -6238,6 +7034,8 @@
     package$text.uppercaseChar_myv2d0$ = uppercaseChar;
     package$text.isHighSurrogate_myv2d0$ = isHighSurrogate;
     package$text.isLowSurrogate_myv2d0$ = isLowSurrogate;
+    package$text.checkRadix_za3lpa$ = checkRadix;
+    package$text.digitOf_xvg9q0$ = digitOf;
     package$text.MatchGroup = MatchGroup;
     Object.defineProperty(Regex, 'Companion', {get: Regex$Companion_getInstance});
     package$text.Regex_init_61zpoe$ = Regex_init_0;
@@ -6258,13 +7056,22 @@
     package$collections.arrayListOf_i5x0yv$ = arrayListOf_0;
     package$collections.get_indices_gzk92b$ = get_indices_12;
     package$collections.throwIndexOverflow = throwIndexOverflow;
+    package$collections.IndexedValue = IndexedValue;
     package$collections.emptyMap_q3lmfv$ = emptyMap;
     package$collections.mapOf_qfcya0$ = mapOf_0;
+    package$collections.hashMapOf_qfcya0$ = hashMapOf_0;
     package$collections.putAll_5gv49o$ = putAll;
+    package$collections.putAll_cweazw$ = putAll_0;
+    package$collections.toMap_6hr0sd$ = toMap;
+    package$collections.toMap_jbpz7q$ = toMap_0;
     package$collections.toMap_ujwnei$ = toMap_2;
+    package$collections.optimizeReadOnlyMap_1vp4qn$ = optimizeReadOnlyMap;
     package$collections.addAll_ye1y7v$ = addAll_1;
     package$collections.removeAll_uhyeqt$ = removeAll_3;
     package$collections.removeAll_qafx1e$ = removeAll_4;
+    package$sequences.sequence_o0x0bg$ = sequence;
+    package$sequences.iterator_o0x0bg$ = iterator_3;
+    package$sequences.SequenceScope = SequenceScope;
     package$sequences.emptySequence_287e2$ = emptySequence;
     package$sequences.TransformingSequence = TransformingSequence;
     package$sequences.FlatteningSequence = FlatteningSequence;
@@ -6285,6 +7092,7 @@
     CoroutineContext.Element = CoroutineContext$Element;
     package$coroutines.CoroutineContext = CoroutineContext;
     package$coroutines.AbstractCoroutineContextElement = AbstractCoroutineContextElement;
+    package$coroutines.AbstractCoroutineContextKey = AbstractCoroutineContextKey;
     Object.defineProperty(package$coroutines, 'EmptyCoroutineContext', {get: EmptyCoroutineContext_getInstance});
     package$coroutines.CombinedContext = CombinedContext;
     Object.defineProperty(package$intrinsics, 'COROUTINE_SUSPENDED', {get: get_COROUTINE_SUSPENDED});
@@ -6292,9 +7100,21 @@
     Object.defineProperty(CoroutineSingletons, 'UNDECIDED', {get: CoroutineSingletons$UNDECIDED_getInstance});
     Object.defineProperty(CoroutineSingletons, 'RESUMED', {get: CoroutineSingletons$RESUMED_getInstance});
     package$intrinsics.CoroutineSingletons = CoroutineSingletons;
+    Object.defineProperty(Random, 'Default', {get: Random$Default_getInstance});
+    package$random.Random_za3lpa$ = Random_0;
+    package$random.fastLog2_kcn2v3$ = fastLog2;
+    package$random.takeUpperBits_b6l1hq$ = takeUpperBits;
+    package$random.checkRangeBounds_6xvm5r$ = checkRangeBounds;
+    package$random.checkRangeBounds_cfj5zr$ = checkRangeBounds_0;
+    package$random.checkRangeBounds_sdh6z7$ = checkRangeBounds_1;
+    package$random.boundsErrorMessage_dgzutr$ = boundsErrorMessage;
+    package$random.XorWowRandom_init_6xvm5r$ = XorWowRandom_init;
+    package$random.XorWowRandom = XorWowRandom;
     package$reflect.KClassifier = KClassifier;
     package$text.appendElement_k2zgzt$ = appendElement_1;
     package$text.equals_4lte5s$ = equals_1;
+    package$text.toLongOrNull_pdl1vz$ = toLongOrNull;
+    package$text.toLongOrNull_6ic1pp$ = toLongOrNull_0;
     package$text.trimStart_wqw3xr$ = trimStart_2;
     package$text.trimEnd_wqw3xr$ = trimEnd_2;
     package$text.startsWith_sgbm27$ = startsWith_1;
