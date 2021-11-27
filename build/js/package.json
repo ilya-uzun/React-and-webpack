@@ -1,10 +1,9 @@
 {
-  "name": "Reack_and_webpack",
+  "name": "Reack_and_wobpack",
   "version": "1.0-SNAPSHOT",
   "private": true,
   "workspaces": [
-    "packages/Reack_and_webpack",
-    "packages/Reack_and_webpack-test"
+    "packages/Reack_and_wobpack"
   ],
   "resolutions": {},
   "devDependencies": {},
