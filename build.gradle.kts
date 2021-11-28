@@ -16,6 +16,7 @@ dependencies {
     implementation("org.jetbrains.kotlin-wrappers:kotlin-styled:5.3.0-pre.206-kotlin-1.5.10")
 }
 
+// среда выполнения для проекта Kotlin/JS, browser {} or nodejs {}
 kotlin {
     js(LEGACY) {
         binaries.executable()
