@@ -1,3 +1,11 @@
+/*
+* Это файл ввода проекта, содержащий основную функцию. Он регистрирует событие загрузки окна. Когда страница загружена,
+* она будет отображена на странице после загрузки страницы. Он вызывает дочернюю функцию,
+* чтобы использовать компонент приветствия в качестве своего дочернего элемента и передать параметры через
+* PROPS.name = "Котлин/JS"
+*/
+// Инфа https://www.programmersought.com/article/60057922080/
+
 import kotlinx.html.InputType
 import kotlinx.html.js.onChangeFunction
 import org.w3c.dom.HTMLInputElement
@@ -46,3 +54,4 @@ class Welcome(props: WelcomeProps) : RComponent<WelcomeProps, WelcomeState>(prop
         }
     }
 }
+
